@@ -1,5 +1,6 @@
 // types/next-auth.d.ts
-import NextAuth, { DefaultSession, DefaultUser } from "next-auth";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import NextAuth from "next-auth";
 
 declare module "next-auth" {
   interface Session {
