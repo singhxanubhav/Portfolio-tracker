@@ -27,7 +27,7 @@ export const authOptions: NextAuthOptions = {
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email! },
         });
-        token.id = dbUser?.id;
+        token.id = dbUser?.id ?? null;
       }
       return token;
     },
