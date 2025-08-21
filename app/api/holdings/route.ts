@@ -3,6 +3,13 @@ import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Type for POST body
+interface HoldingBody {
+  symbol: string;
+  shares: number;
+  purchasePrice: number;
+}
+
 // Get all holdings of logged-in user
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -27,7 +34,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const body = await req.json();
+    const body: HoldingBody = await req.json();
     console.log("📥 Incoming body =>", body);
 
     const { symbol, shares, purchasePrice } = body;
@@ -41,15 +48,16 @@ export async function POST(req: Request) {
         stock: symbol,
         quantity: shares,
         avgPrice: purchasePrice,
-        userId: session.user.id, // ✅ link to logged-in user
+        userId: session.user.id,
       },
     });
 
     console.log("✅ Inserted Holding =>", newHolding);
 
     return NextResponse.json(newHolding);
-  } catch (err: any) {
-    console.error("❌ Error inserting holding:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error("Unknown error");
+    console.error("❌ Error inserting holding:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
