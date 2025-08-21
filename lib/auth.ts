@@ -11,6 +11,7 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
+    // Called whenever a user signs in
     async signIn({ user }) {
       await prisma.user.upsert({
         where: { email: user.email! },
@@ -22,18 +23,22 @@ export const authOptions: NextAuthOptions = {
       });
       return true;
     },
+
+    // Called whenever a JWT token is created/updated
     async jwt({ token, user }) {
       if (user) {
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email! },
         });
-        token.id = dbUser?.id ?? null;
+        token.id = dbUser?.id ?? undefined; // ✅ Fixed: use undefined instead of null
       }
       return token;
     },
+
+    // Called whenever a session is checked/created
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
+        session.user.id = token.id as string; // safe because token.id is string | undefined
       }
       return session;
     },
